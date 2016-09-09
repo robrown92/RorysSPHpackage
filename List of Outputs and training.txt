@@ -1,0 +1,76 @@
+List of Outputa and Training
+____________________________
+
+
+
+    Publications
+    ____________
+
+    Talks and posters
+    _________________
+
+    	Talk given to Strategic Advisory Board 2015 - Smoothed Particle Hydrodynamics in Astrophysics
+
+    	Talk given to Strategic Advisory Board 2016 - Smoothed Particle Hydrodynamics in Coastal defence with ABPmer
+
+    	Poster at Strategic Advisory Board 2015 - Smoothed Particle Hydrodynamics for modelling Be/neutron star binary interactions
+
+    	Poster at NGCM Summer Academy 2016 - The effect of spiral structures on observations in Be/neutron star binaries
+
+    Media appearances
+    _________________
+
+    Prizes
+ 	______
+
+    Outreach and other activities
+    _____________________________
+
+    Patents
+    _______
+
+    Seminars (and workshops given)
+    ______________________________
+
+  		University of Southampton Festival of Doctoral Research 2016 Beginner Python Programming Workshop
+
+  		NGCM Summer Academy 2016 Basics A: Python for Beginners
+
+  		Advanced Computational Methods Workshops - Workshop on HDF5
+
+    Software
+    ________
+
+    Training -- workshops, summer/winter schools, hackathons, etc you participated in
+    ________
+
+    	An Introduction to the Julia Language - Workshop given by Joshua Greenhalgh and Jonathon Waters
+
+		Fortran programming language - Workshop given by John Begleris
+
+		NGCM summer academy 2015: Intel Phi and CUDA workshops
+
+		Equality in academia - Given by Dr. Mike Childress
+
+    Other results -- this could include internal reports, and any other outputs 
+    _____________
+
+    	Report on visit to Japan to be used for RAS
+
+    Collaboration
+    _____________
+
+    	ABPmer (summer project July - September 2015)
+
+    	Professor Atsuo Okazaki at Hokkai-Gakuen University in Sapporo, Japan. (6th July - 27th July 2016)
+
+    Grants
+    ______
+
+    	RAS grant of £960 to travel to Japan for three weeks.
+
+    Case Studies
+    ____________
+
+    	Application of Smoothed Particle Hydrodynamics, originally an astrophysical computational method, to coastal defence methods.
+
