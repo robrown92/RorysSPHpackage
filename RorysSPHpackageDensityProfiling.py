@@ -196,7 +196,8 @@ def plotEquatorialDensityProfile(filenames, ylims=[-1e-6, 1e-6], tol=1e-4):
 
     " Initialise arrays "
     colour = 0
-    for filename in filenames[3::4]:
+    start = 0
+    for filename in filenames[start::4]:
 #        diskname = 'INPUT/disk001'
 #        IPname = 'INPUT/IPDISK411'
         diskname = filename[:-26] + "disk001"
@@ -220,22 +221,22 @@ def plotEquatorialDensityProfile(filenames, ylims=[-1e-6, 1e-6], tol=1e-4):
         #p = np.polyfit(np.log10(Rs), np.log10(rhos), 1)
     #    print p
         
-        sortOrder = np.argsort(Rs)        
+        sortOrder = np.argsort(Rs)         
         
-        plt.plot(Rs[sortOrder], np.log10(rhos)[sortOrder],  label = ['M1.4_20d_0.0e',
-                                                                   'M1.4_28d_0.2e',
-                                                                   'M1.4_43d_0.4e',
-                                                                   'M1.4_79.1d_0.6e',
+        plt.plot(Rs[sortOrder], np.log10(rhos)[sortOrder],  label = [r'1.4M$_{\odot}$, e=0.0',
+                                                                   r'1.4M$_{\odot}$, e=0.2',
+                                                                   r'1.4M$_{\odot}$, e=0.4',
+                                                                   r'1.4M$_{\odot}$, e=0.6',
                       
-                                                                   'M6_17.4d_0.0e',
-                                                                   'M6_24.3d_0.2e',
-                                                                   'M6_37.5d_0.4e',
-                                                                   'M6_68.8d_0.6e',
+                                                                   r'6M$_{\odot}$, e=0.0',
+                                                                   r'6M$_{\odot}$, e=0.2',
+                                                                   r'6M$_{\odot}$, e=0.4',
+                                                                   r'6M$_{\odot}$, e=0.6',
                      
-                                                                   'M10_15.8d_0.0e',
-                                                                   'M10_22.1d_0.2e',
-                                                                   'M10_34.1d_0.4e',
-                                                                   'M10_62.6d_0.6e',][3::4][colour], 
+                                                                   r'10M$_{\odot}$, e=0.0',
+                                                                   r'10M$_{\odot}$, e=0.2',
+                                                                   r'10M$_{\odot}$, e=0.4',
+                                                                   r'10M$_{\odot}$, e=0.6',][start::4][colour], 
                    color=['b', 'g', 'r', 'y', 'black', 'brown', 'turquoise', 'pink', 'purple'][colour]) #label=ylims[1] +"gradient = {:.3}".format(p[0]))
         colour += 1
         #plt.plot(np.log10(Rs), p[0] * np.log10(Rs) + p[1], color='r')
@@ -1389,13 +1390,13 @@ rhotemp = np.array([])
 #plotDensityProfile(['../../Desktop/40d_0.0e_eqTest/QGDISK38108'], ylims=['b', 'just Be '])
 plotEquatorialDensityProfile(['/data/rob1g10/SPH/DATA/DISKS/M1.4_20d_0.0e/processedDISKs/QGDISK19315',
                          '/data/rob1g10/SPH/DATA/DISKS/M1.4_28d_0.2e/processedDISKs/QGDISK30918',
-                         '/data/rob1g10/SPH/DATA/DISKS/M1.4_43d_0.4e/processedDISKs/QGDISK49309',
+                         '/data/rob1g10/SPH/DATA/DISKS/M1.4_43d_0.4e/processedDISKs/QGDISK53903',
                          '/data/rob1g10/SPH/DATA/DISKS/M1.4_79.1d_0.6e/processedDISKs/QGDISK38204',
                          
                          '/data/rob1g10/SPH/DATA/DISKS/M6_17.4d_0.0e/processedDISKs/QGDISK39533',
                          '/data/rob1g10/SPH/DATA/DISKS/M6_24.3d_0.2e/processedDISKs/QGDISK36042',
                          '/data/rob1g10/SPH/DATA/DISKS/M6_37.5d_0.4e/processedDISKs/QGDISK15836',
-                         '/data/rob1g10/SPH/DATA/DISKS/M6_68.8d_0.6e/processedDISKs/QGDISK24405',
+                         '/data/rob1g10/SPH/DATA/DISKS/M6_68.8d_0.6e/processedDISKs/QGDISK27501',
                          
                          '/data/rob1g10/SPH/DATA/DISKS/M10_15.8d_0.0e/processedDISKs/QGDISK32745',
                          '/data/rob1g10/SPH/DATA/DISKS/M10_22.1d_0.2e/processedDISKs/QGDISK37237',
