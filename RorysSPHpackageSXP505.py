@@ -6,6 +6,191 @@ from scipy.optimize import leastsq, curve_fit
 from RorysSPHpackageStripdisks import createAccretionArray
 from RorysSPHpackage import readQDISK, readUnits, readFILES, readQADISK, findPeriastron, calcQDISKsForOrbit, findBinaryPhase, findDiskSize
 
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    """
+    axis = np.asarray(axis)
+    axis = axis/np.sqrt(np.dot(axis, axis))
+    a = np.cos(theta/2.0)
+    b, c, d = -axis*np.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+def plot_System_NSacc_Obscuration_DiscArea(basename, DISKstart, DISKend, DISKsteps,
+                                           orientation=[0,0], minRho='n', maxRho='n', 
+                                           obscTol=1.0, areaSteps=10):
+                                               
+    "Assemble full arrays of quantities to plot of each time step"
+    for DISKnum in range(DISKstart, DISKend):
+        for DISKstep in range(DISKsteps):
+    diskname = filename[:-26] + "disk001"
+    IPname = filename[:-11] + "IPDISK" + filename[-5:-2]
+    Becoords, NScoords, partcoords, partvels, rho, u, num_parts, time, umass, udist, utime = readFILES(filename, diskname, IPname)
+    Becoords *= udist / (7 * 6.96e10)
+    NScoords *= udist / (7 * 6.96e10)
+    partcoords *= udist / (7 * 6.96e10)
+    rho *= umass / (udist ** 3)
+
+    xcoords = np.array(partcoords[:,0])
+    ycoords = np.array(partcoords[:,1])
+    zcoords = np.array(partcoords[:,2])
+    NScoords = np.array(NScoords)
+    R = np.sqrt(xcoords**2 + ycoords**2)
+
+    if(maxRho !='n'):
+        rhomax = maxRho
+    else:
+        rhomax = max(rho)
+    if(maxRho !='n'):
+        rhomin = minRho
+    elif(min(rho) < 0):
+        rhomin = 0
+    else:
+        rhomin = min(rho)
+        
+    "Alternate colors"
+    
+    cm = plt.cm.get_cmap('rainbow')
+#    cm = plt.cm.get_cmap('hot')
+    colours = np.zeros(len(rho))
+    for i in range(len(rho)):
+        rgrad = round(1 - rho[i]/rhomax, 1)
+        if(rgrad > 1):
+            rgrad = 1
+        colours[i] = rgrad
+        
+        
+    R = np.sqrt(partcoords[:,0]**2 + partcoords[:,1]**2)
+
+    """3D Plot of System"""
+
+    fig = plt.figure(figsize=(15, 15))
+    ax3D = fig.add_subplot(2, 2, 1, projection='3d')
+    sc = ax3D.scatter(xcoords, ycoords, zcoords, c=rho, s=0.5, vmin=rhomin, vmax=rhomax, cmap=cm, edgecolor='')
+
+    ax3D.scatter(NScoords[0], NScoords[1], NScoords[2], color='b')
+
+    ax3D.set_xlim(-11, 11)
+    ax3D.set_ylim(-11, 11)
+    ax3D.set_zlim(-11, 11)
+
+    ax3D.set_xlabel('x')
+    ax3D.set_ylabel('y')
+    ax3D.set_zlabel('z')
+
+    ax3D.view_init(elev=orientation[0]+90, azim=orientation[1]+90)
+    print sc
+    
+    " Rotation Test "  
+    
+    theta = -orientation[0]
+    phi = -orientation[1]
+    
+#    theta = -90
+#    phi = 0
+    
+    theta = np.deg2rad(theta)
+    phi = np.deg2rad(phi)
+    
+    "Particle Rotation"    
+    
+    rotSolution = np.dot(rotation_matrix([0, 0, 1], phi), [xcoords, ycoords, zcoords])
+    
+    xrot1, yrot1, zrot1 = rotSolution[0], rotSolution[1], rotSolution[2]
+    
+    rotSolution = np.dot(rotation_matrix([1, 0, 0], theta), [xrot1, yrot1, zrot1])
+    
+    xSol, ySol, zSol = rotSolution[0], rotSolution[1], rotSolution[2]
+    
+    "Now NS"
+    
+    rotSolution = np.dot(rotation_matrix([0, 0, 1], phi), [NScoords[0], NScoords[1], NScoords[2]])
+    
+    NSxrot1, NSyrot1, NSzrot1 = rotSolution[0], rotSolution[1], rotSolution[2]
+    
+    rotSolution = np.dot(rotation_matrix([1, 0, 0], theta), [NSxrot1, NSyrot1, NSzrot1])
+    
+    NSxSol, NSySol, NSzSol = rotSolution[0], rotSolution[1], rotSolution[2]
+
+    ax3Dtest = fig.add_subplot(2, 2, 2, projection='3d')
+    ax3Dtest.scatter(xSol, ySol, zSol, c=rho, s=0.5, vmin=rhomin, vmax=rhomax, cmap=cm, edgecolor='')
+                 
+    ax3Dtest.scatter(NSxSol, NSySol, NSzSol, color='b')
+    
+    ax3Dtest.set_xlim(-11, 11)
+    ax3Dtest.set_ylim(-11, 11)
+    ax3Dtest.set_zlim(-11, 11)    
+    
+    ax3Dtest.set_xlabel('x')
+    ax3Dtest.set_ylabel('y')
+    ax3Dtest.set_zlabel('z')
+    
+    ax3Dtest.view_init(elev=90, azim=90)
+    
+    " NS Accretion "  
+    
+#    os.system("ls /data/rob1g10/SPH/DATA/DISKS/{}/disk* > lsdisks.txt".format(filename))
+#    
+#    f = open("lsdisks.txt", 'r')
+#    lines = f.readlines()
+#	
+#    numdisks = int(lines[-1][-3:])
+#    
+#    f.close()
+#
+#    disks = np.array([])        
+#    
+#    for ND in range(1, numdisks+1):
+#        disks = np.append(disks, '/data/rob1g10/SPH/DATA/DISKS/{}/disk{:03}'.format(baseNames[BN], ND))
+    
+
+#    accTimes, accArray = createAccretionArray(disks,"NScapture", None, 'day', tol=0.01)
+#    accArray *= 1e-14 * umass / (24*3600)
+#    accTimes = accTimes.astype(float)
+    
+#    axAccr = fig.add_subplot(2, 2, 2 )
+
+#    axAccr.plot
+
+    " Obscuration "
+    
+    axObsc = fig.add_subplot(2, 2, 3 )
+
+    rhoObsc = np.sum( rho[ (xSol <= NSxSol + obscTol) * (xSol >= NSxSol - obscTol) 
+                            * (ySol <= NSySol + obscTol) * (ySol >= NSySol - obscTol) 
+                            * (zSol >= NSzSol)
+                          ]) 
+    
+    print rhoObsc    
+    
+    axObsc.scatter(time * utime / (24 * 3600), np.log10(rhoObsc))
+#    axObsc.set_ylim(-8, 0)
+
+    " Disc Size "
+    
+    axDisc = fig.add_subplot(2, 2, 4 )
+    
+    "Step through bands of y coordinates and find max and min x coords to find area"
+    
+    discArea = 0
+    stepSize = (np.max(ySol) - np.min(ySol)) / areaSteps
+    for ybands in np.linspace(np.min(ySol), np.max(ySol), areaSteps):
+        xband = xSol[ (ySol >= ybands) * (ySol < ybands + stepSize) ]
+#        print len(xband), stepSize
+        discArea += stepSize * (np.max(xband) - np.min(xband))
+        
+    axDisc.scatter(time * utime / (24 * 3600), discArea)
+    
+    return
+
+
+
 def gridPlotForDiscSize(filenames):
     
     # find density range for colour bar
@@ -241,35 +426,35 @@ def plotCOaccretion(baseNames, Mx, orbit, colour):
         
 baseNames=np.array([
 
-                    'M1.4_20d_0.0e', 
-                    'M3_19d_0.0e',   
-                    'M4_18.4d_0.0e', 
-                    'M5_17.9d_0.0e', 
-                    'M6_17.4d_0.0e', 
-                    'M7_17d_0.0e',   
-                    'M8_16.6d_0.0e',
-                    'M9_16.2d_0.0e', 
-                    'M10_15.8d_0.0e', 
-                    
-                    'M1.4_23.4d_0.1e', 
-                    'M3_22.2d_0.1e',   
-                    'M4_21.6d_0.1e', 
-                    'M5_21d_0.1e', 
-                    'M6_20.4d_0.1e', 
-                    'M7_19.9d_0.1e',   
-                    'M8_19.4d_0.1e',
+#                    'M1.4_20d_0.0e', 
+#                    'M3_19d_0.0e',   
+#                    'M4_18.4d_0.0e', 
+#                    'M5_17.9d_0.0e', 
+#                    'M6_17.4d_0.0e', 
+#                    'M7_17d_0.0e',   
+#                    'M8_16.6d_0.0e',
+#                    'M9_16.2d_0.0e', 
+#                    'M10_15.8d_0.0e', 
+#                    
+#                    'M1.4_23.4d_0.1e', 
+#                    'M3_22.2d_0.1e',   
+#                    'M4_21.6d_0.1e', 
+#                    'M5_21d_0.1e', 
+#                    'M6_20.4d_0.1e', 
+#                    'M7_19.9d_0.1e',   
+#                    'M8_19.4d_0.1e',
 #                    'M9_19d_0.1e', 
 #                    'M10_18.5d_0.1e',                     
                     
-                    'M1.4_28d_0.2e', 
-                    'M3_26.5d_0.2e', 
-                    'M4_25.7d_0.2e', 
-                    'M5_25d_0.2e',   
-                    'M6_24.3d_0.2e', 
-                    'M7_23.7d_0.2e', 
-                    'M8_23.1d_0.2e',
-                    'M9_22.6d_0.2e',  
-                    'M10_22.1d_0.2e',
+#                    'M1.4_28d_0.2e', 
+#                    'M3_26.5d_0.2e', 
+#                    'M4_25.7d_0.2e', 
+#                    'M5_25d_0.2e',   
+#                    'M6_24.3d_0.2e', 
+#                    'M7_23.7d_0.2e', 
+#                    'M8_23.1d_0.2e',
+#                    'M9_22.6d_0.2e',  
+#                    'M10_22.1d_0.2e',
 #                    
 #                    'M1.4_43d_0.4e', 
 #                    'M3_40.8d_0.4e', 
@@ -460,18 +645,21 @@ sec4 = sec3 + 9
 #plt.xlabel("Compact object mass")
 
 #plt.scatter(Mx[sec4:], discSize[sec4:], marker='H', color='black', label="e = 0.6")
-p1 = np.polyfit(Mx[sec3:sec4], discSize[sec3:sec4], 1)
-print p1[0], p1[1]
-plt.plot(Mx[sec3:sec4], Mx[sec3:sec4]*p1[0] + p1[1], color='g')
-plt.scatter(Mx[sec3:sec4], discSize[sec3:sec4], marker='^', color='g', label="e = 0.4")
-p2 = np.polyfit(Mx[sec2:sec3][:-1], discSize[sec2:sec3][:-1], 1)
-print p2[0], p2[1]
-plt.plot(Mx[sec2:sec3], Mx[sec2:sec3]*p2[0] + p2[1], color='r')
-plt.scatter(Mx[sec2:sec3], discSize[sec2:sec3], marker='x', color='r', label="e = 0.2")
-p3 = np.polyfit(Mx[:sec2], discSize[:sec2], 1)
-print p3[0], p3[1]
-plt.plot(Mx[:sec2], Mx[:sec2]*p3[0] + p3[1], color='b')
-plt.scatter(Mx[:sec2], discSize[:sec2], marker='o', color='b', label="e = 0.0")
-plt.ylabel("Disc size / stellar radii")
-plt.xlabel("Compact object mass")
-plt.legend(loc='lower left')
+#p1 = np.polyfit(Mx[sec3:sec4], discSize[sec3:sec4], 1)
+#print p1[0], p1[1]
+#plt.plot(Mx[sec3:sec4], Mx[sec3:sec4]*p1[0] + p1[1], color='g')
+#plt.scatter(Mx[sec3:sec4], discSize[sec3:sec4], marker='^', color='g', label="e = 0.4")
+#p2 = np.polyfit(Mx[sec2:sec3][:-1], discSize[sec2:sec3][:-1], 1)
+#print p2[0], p2[1]
+#plt.plot(Mx[sec2:sec3], Mx[sec2:sec3]*p2[0] + p2[1], color='r')
+#plt.scatter(Mx[sec2:sec3], discSize[sec2:sec3], marker='x', color='r', label="e = 0.2")
+#p3 = np.polyfit(Mx[:sec2], discSize[:sec2], 1)
+#print p3[0], p3[1]
+#plt.plot(Mx[:sec2], Mx[:sec2]*p3[0] + p3[1], color='b')
+#plt.scatter(Mx[:sec2], discSize[:sec2], marker='o', color='b', label="e = 0.0")
+#plt.ylabel("Disc size / stellar radii")
+#plt.xlabel("Compact object mass")
+#plt.legend(loc='lower left')
+
+plot_System_NSacc_Obscuration_DiscArea('/data/rob1g10/SPH/DATA/DISKS/SXP5.05_M-9_alpha0.3/processedDISKs/QGDISK30004', 
+                                       orientation=[-30,110])
